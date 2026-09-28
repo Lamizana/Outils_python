@@ -3,7 +3,7 @@ import qrcode
 import argparse
 import requests
 from urllib.parse import urlparse
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image
 
 
 # -----------------------------------------------------------------------------
@@ -35,9 +35,8 @@ def url_existe(url: str) -> bool:
 
 
 # -----------------------------------------------------------------------------
-def generer_qrcode(donnees: str, texte_visible: str, fichier_sortie: str) -> None:
-    """Génère un QR Code PNG avec le texte visible en dessous."""
-    # 1. Générer l'image du QR Code
+def generer_qrcode(donnees: str, fichier_sortie: str) -> None:
+    """Génère un QR Code PNG sans texte en dessous."""
     qr = qrcode.QRCode(
         error_correction=qrcode.constants.ERROR_CORRECT_H,
         box_size=10,
@@ -46,31 +45,7 @@ def generer_qrcode(donnees: str, texte_visible: str, fichier_sortie: str) -> Non
     qr.add_data(donnees)
     qr.make(fit=True)
     img_qr = qr.make_image(fill_color="black", back_color="white").convert("RGB")
-
-    # 2. Récupérer les dimensions
-    largeur_qr, hauteur_qr = img_qr.size
-    hauteur_texte = 60
-
-    # 3. Créer une image blanche plus haute
-    img_finale = Image.new(
-        "RGB",
-        (largeur_qr, hauteur_qr + hauteur_texte),
-        color="white",
-    )
-
-    # 4. Coller le QR Code en haut
-    img_finale.paste(img_qr, (0, 0))
-
-    # 5. Écrire l'URL, centrée, en bas
-    police = ImageFont.load_default()
-    dessin = ImageDraw.Draw(img_finale)
-    largeur_texte = dessin.textlength(texte_visible, font=police)
-    x = (largeur_qr - largeur_texte) // 2
-    y = hauteur_qr + 20
-    dessin.text((x, y), texte_visible, fill="black", font=police)
-
-    # 6. Sauvegarder
-    img_finale.save(fichier_sortie)
+    img_qr.save(fichier_sortie)
 
 
 # -----------------------------------------------------------------------------
@@ -93,7 +68,7 @@ def main() -> int:
         print(f"ERREUR : L'URL {url} n'est pas accessible")
         return 1
 
-    generer_qrcode(url, url, "qrcode_site.png")
+    generer_qrcode(url, "qrcode_site.png")
 
     print("QR Code généré : qrcode_site.png")
     return 0
