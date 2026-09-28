@@ -17,8 +17,11 @@ def normaliser_url(url: str) -> str:
 # -----------------------------------------------------------------------------
 def est_url_valide(url: str) -> bool:
     """Retourne True si l'URL a un format valide."""
+    if " " in url:
+        return False
+
     resultat = urlparse(url)
-    return resultat.scheme in ("http", "https") and bool(resultat.netloc)
+    return resultat.scheme in ("http", "https") and "." in resultat.netloc
 
 
 # -----------------------------------------------------------------------------
@@ -87,10 +90,11 @@ def main() -> int:
         return 1
 
     if not url_existe(url):
-        print(f"ERREUR : L'URL {url} n'est pas accessible (code HTTP != 200)")
+        print(f"ERREUR : L'URL {url} n'est pas accessible")
         return 1
 
     generer_qrcode(url, url, "qrcode_site.png")
+
     print("QR Code généré : qrcode_site.png")
     return 0
 

@@ -1,3 +1,6 @@
+# QR Codes générés
+qrCode/*.png
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -216,3 +219,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# QR Codes générés (sortie de qrCode/qrcode_site.py)
+qrcode_site.png
