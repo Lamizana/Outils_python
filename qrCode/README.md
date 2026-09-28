@@ -1,7 +1,7 @@
-# QR Code (site)
+# QR Code — URL
 
 Génère un QR Code à partir d'une URL de site web, avec l'URL écrite en clair
-sous le code — une solution de secours si le QR ne peut pas être scanné
+sous le code. C'est une solution de secours si le QR ne peut pas être scanné
 (papier abîmé, mauvaise lumière, etc.).
 
 ---
@@ -18,16 +18,16 @@ sous le code — une solution de secours si le QR ne peut pas être scanné
 ## Choix des bibliothèques
 
 | Bibliothèque | Type | Rôle | Pourquoi celle-ci |
-|--------------|------|------|-------------------|
+| -------------- | ------ | ------ | ------------------- |
 | `argparse` | standard | Lire les arguments en ligne de commande | Gère `--help`, les erreurs d'usage et le typage automatiquement. Plus robuste que `sys.argv` brut. |
 | `urllib.parse` | standard | Décomposer et analyser une URL | Fournit `urlparse` qui isole le schéma (`https`) et le domaine. Rien à installer. |
 | `requests` | tierce | Faire la requête HTTP de vérification | API bien plus lisible que `urllib.request` (stdlib) pour un simple `GET`. |
 | `qrcode` | tierce | Générer le QR Code | La référence Python pour les QR, simple et bien documentée. |
 | `Pillow` | tierce | Composer l'image finale (texte sous le QR) | Le standard de fait pour manipuler des images en Python. |
 
-> **Règle de choix retenue** : bibliothèque standard quand elle suffit (`argparse`,
-> `urllib.parse`), bibliothèque tierce quand elle simplifie nettement le code
-> (`requests`, `qrcode`, `Pillow`).
+> [!note] Règle de choix retenue
+> - Bibliothèque standard quand elle suffit (`argparse`, `urllib.parse`)
+> - Bibliothèque tierce quand elle simplifie nettement le code (`requests`, `qrcode`, `Pillow`).
 
 ---
 
@@ -56,12 +56,15 @@ def est_url_valide(url: str) -> bool:
     return resultat.scheme in ("http", "https") and "." in resultat.netloc
 ```
 
-Deux vérifications : **pas d'espace** (`urlparse` tolère `pas une url`, pas nous)
-et **un point dans le domaine** (donc un vrai TLD : `exemple.com`, pas `a`).
+Deux vérifications :
+
+- **pas d'espace** (`urlparse` tolère `pas une url`, pas nous)
+- **un point dans le domaine** (donc un vrai TLD : `exemple.com`, pas `a`).
+
 On accepte uniquement `http` et `https`.
 
-> ⚠️ Limite assumée : `https://localhost` est rejeté (pas de point). C'est un
-> compromis volontaire — une règle simple et lisible plutôt qu'une regex complexe.
+> [!warning] **Limite assumée**
+> `https://localhost` est rejeté (pas de point). C'est un compromis volontaire, une règle simple et lisible plutôt qu'une regex complexe.
 
 ### `url_existe(url)`
 
@@ -74,22 +77,38 @@ def url_existe(url: str) -> bool:
         return False
 ```
 
-Envoie une requête et regarde le code HTTP : `200` = OK, `403` = le site existe
-mais refuse les robots (on le considère comme existant). Un `timeout` de 10 s
-évite de bloquer indéfiniment. Si quoi que ce soit échoue (DNS, réseau coupé,
-timeout), on retourne `False`.
+Envoie une requête et regarde le code HTTP :
+
+- **`200`** = OK
+- **`403`** = le site existe mais refuse les robots (on le considère comme existant)
+
+Un `timeout` de 10 s évite de bloquer indéfiniment. Si quoi que ce soit échoue (DNS, réseau coupé, timeout), on retourne `False`.
 
 ### `generer_qrcode(donnees, texte_visible, fichier_sortie)`
 
 ```python
-qr = qrcode.QRCode(
-    error_correction=qrcode.constants.ERROR_CORRECT_H,  # 30% de correction
-    box_size=10,                                        # taille d'un module
-    border=4,                                           # marge blanche
-)
-qr.add_data(donnees)
-qr.make(fit=True)                                       # ajuste la taille auto
-img_qr = qr.make_image(fill_color="black", back_color="white").convert("RGB")
+def generer_qrcode(donnees: str, texte_visible: str, fichier_sortie: str) -> None:
+    """Génère un QR Code PNG avec le texte visible en dessous."""
+    qr = qrcode.QRCode(
+        error_correction=qrcode.constants.ERROR_CORRECT_H,  # 30% de correction
+        box_size=10,                                        # taille d'un module
+        border=4,                                           # marge blanche
+    )
+    qr.add_data(donnees)
+    qr.make(fit=True)                                       # ajuste la taille auto
+    img_qr = qr.make_image(fill_color="black", back_color="white").convert("RGB")
+
+    # Compose l'image : QR en haut, texte en bas
+    largeur_qr, hauteur_qr = img_qr.size
+    img_finale = Image.new("RGB", (largeur_qr, hauteur_qr + 60), color="white")
+    img_finale.paste(img_qr, (0, 0))
+
+    police = ImageFont.load_default()
+    dessin = ImageDraw.Draw(img_finale)
+    x = (largeur_qr - dessin.textlength(texte_visible, font=police)) // 2
+    dessin.text((x, hauteur_qr + 20), texte_visible, fill="black", font=police)
+
+    img_finale.save(fichier_sortie)
 ```
 
 Le QR est généré puis **composé** avec Pillow : on crée une image blanche plus
@@ -135,6 +154,12 @@ vérifications a échoué — c'est ce qui rend le débogage rapide.
 
 ---
 
+## Prérequis
+
+- Python 3.9 ou supérieur
+
+---
+
 ## Installation
 
 ```bash
@@ -156,3 +181,9 @@ python qrCode/qrcode_site.py lamizana.github.io/ZehdBox
 python qrCode/qrcode_site.py "pas une url"
 # → ERREUR : L'URL https://pas une url n'est pas valide
 ```
+
+---
+
+## Licence
+
+MIT — voir [LICENSE](../LICENSE) à la racine du dépôt.
