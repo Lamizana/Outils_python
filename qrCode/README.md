@@ -1,4 +1,4 @@
-# QR Code — URL
+# QR Code | URL
 
 Génère un QR Code à partir d'une URL de site web.
 
@@ -32,13 +32,13 @@ pip install -r requirements.txt
 
 ```bash
 # Depuis la racine du dépôt
-python qrCode/qrcode_site.py lamizana.github.io/ZehdBox
-# → génère qrcode_site.png dans le dossier courant
+# génère qrcode_site.png dans le dossier courant
+python3 qrCode/qrcode_site.py lamizana.github.io/ZehdBox
 ```
 
 ```bash
-python qrCode/qrcode_site.py "pas une url"
-# → ERREUR : L'URL https://pas une url n'est pas valide
+# ERREUR : L'URL https://pas une url n'est pas valide
+python3 qrCode/qrcode_site.py "pas une url"
 ```
 
 ---
@@ -91,7 +91,7 @@ Deux vérifications :
 
 On accepte uniquement `http` et `https`.
 
-> [!warning] **Limite assumée**
+> [!warning]
 > `https://localhost` est rejeté (pas de point). C'est un compromis volontaire, une règle simple et lisible plutôt qu'une regex complexe.
 
 ### `url_existe(url)`
@@ -150,7 +150,7 @@ propager ce code à l'appelant.
 Trois niveaux de contrôle, du plus simple au plus coûteux :
 
 | Étape | Nature | Style |
-|-------|--------|-------|
+| ------- | -------- | ------- |
 | `est_url_valide` | Erreur **prévisible** (format) | `if` → LBYL (Look Before You Leap) |
 | `url_existe` | Erreur **imprévisible** (réseau) | `try/except` → EAFP (Easier to Ask Forgiveness) |
 | `main` | Comportement d'arrêt | codes de retour `0` / `1` |
@@ -163,7 +163,7 @@ l'exception — c'est le cas d'école du `try/except`.
 ### Codes de retour
 
 | Code | Signification |
-|------|---------------|
+| ------ | --------------- |
 | `0` | Succès |
 | `1` | Échec (format invalide **ou** URL injoignable) |
 
