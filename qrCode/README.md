@@ -53,7 +53,7 @@ python qrCode/qrcode_site.py "pas une url"
 | `qrcode` | tierce | Générer le QR Code | La référence Python pour les QR, simple et bien documentée. |
 | `Pillow` | tierce | Rendu des images PNG | Moteur d'image utilisé par `qrcode` pour produire le fichier PNG. |
 
-> [!note] Règle de choix retenue
+> [!note]
 > - Bibliothèque standard quand elle suffit (`argparse`, `urllib.parse`)
 > - Bibliothèque tierce quand elle simplifie nettement le code (`requests`, `qrcode`, `Pillow`).
 

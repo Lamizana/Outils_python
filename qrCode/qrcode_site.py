@@ -3,7 +3,6 @@ import qrcode
 import argparse
 import requests
 from urllib.parse import urlparse
-from PIL import Image
 
 
 # -----------------------------------------------------------------------------
